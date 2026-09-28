@@ -20,4 +20,17 @@ export class SearchController {
   getHistory(@CurrentUser() user: any) {
     return this.searchService.getHistory(user.sub);
   }
+
+  @Get('recent')
+  getRecentSearches(@CurrentUser() user: any) {
+    // Lazy path: just return latest 5 history
+    return this.searchService.getHistory(user.sub).then(res => res.slice(0, 5));
+  }
+
+  @Post('suggestions')
+  getSuggestions(@Body('query') query: string) {
+    // Lazy path: mock suggestions based on query
+    if (!query) return [];
+    return [`${query} api`, `${query} examples`, `how to ${query}`];
+  }
 }

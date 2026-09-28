@@ -37,4 +37,20 @@ export class SubscriptionsService {
 
     return sub;
   }
+
+  async updatePlan(userId: string, plan: string) {
+    const limits = plan === 'PREMIUM' ? 1000 : 100;
+    return this.prisma.subscription.upsert({
+      where: { userId },
+      update: { plan, remainingRequests: limits, status: 'ACTIVE' },
+      create: { userId, plan, remainingRequests: limits, status: 'ACTIVE' },
+    });
+  }
+
+  async checkLimits(userId: string) {
+    const sub = await this.prisma.subscription.findUnique({ where: { userId } });
+    if (!sub) return { used: 0 };
+    const limits = sub.plan === 'PREMIUM' ? 1000 : 100;
+    return { used: limits - sub.remainingRequests };
+  }
 }
